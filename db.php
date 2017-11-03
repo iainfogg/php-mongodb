@@ -13,10 +13,10 @@ class DB {
 	*/
     public $limit = 5;
 
-	
+
 	public function __construct($config){
 
-		$this->connect($config);	
+		$this->connect($config);
 	}
 
 	private function connect($config){
@@ -25,7 +25,8 @@ class DB {
 	            echo ("The MongoDB PECL extension has not been installed or enabled");
 	            return false;
 	        }
-			$connection=  new \MongoClient($config['connection_string'],array('username'=>$config['username'],'password'=>$config['password']));
+//			$connection=  new \MongoClient($config['connection_string'],array('username'=>$config['username'],'password'=>$config['password']));
+            $connection=  new \MongoClient($config['connection_string']);
 	    	return $this->db = $connection->selectDB($config['dbname']);
 		}catch(Exception $e) {
 			return false;
@@ -52,7 +53,7 @@ class DB {
 	/**
 	 * get all data in collection and paginator
 	 *
-	 * @return multi array 
+	 * @return multi array
 	 */
 	public function get($page,$collection){
 
@@ -60,15 +61,15 @@ class DB {
 		$articlesPerPage = $this->limit;
 
 		//number of article to skip from beginning
-		$skip = ($currentPage - 1) * $articlesPerPage; 
+		$skip = ($currentPage - 1) * $articlesPerPage;
 
 		$table = $this->db->selectCollection($collection);
 
 		$cursor = $table->find();
 		//total number of articles in database
-		$totalArticles = $cursor->count(); 
+		$totalArticles = $cursor->count();
 		//total number of pages to display
-		$totalPages = (int) ceil($totalArticles / $articlesPerPage); 
+		$totalPages = (int) ceil($totalArticles / $articlesPerPage);
 
 		$cursor->sort(array('saved_at' => -1))->skip($skip)->limit($articlesPerPage);
 		//$cursor = iterator_to_array($cursor);
@@ -113,7 +114,7 @@ class DB {
 		}
 		$table 	 = $this->db->selectCollection($collection);
 		$result  = $table->update(
-				array('_id' => new \MongoId($id)), 
+				array('_id' => new \MongoId($id)),
 				array('$set' => $article)
 		);
 		if (!$id){
@@ -127,7 +128,7 @@ class DB {
 	 * @return boolean
 	 */
 	public function commentId($id,$collection,$comment){
-		
+
 		$postCollection = $this->db->selectCollection($collection);
 		$post = $postCollection->findOne(array('_id' => new \MongoId($id)));
 
@@ -135,11 +136,11 @@ class DB {
 			$comments = $post['comments'];
 		}else{
 			$comments = array();
-		}	                
+		}
 		array_push($comments, $comment);
 
 		return $postCollection->update(
-						array('_id' => new \MongoId($id)), 
+						array('_id' => new \MongoId($id)),
 						array('$set' => array('comments' => $comments))
 		);
 	}
